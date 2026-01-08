@@ -6,14 +6,14 @@ import raybe_plot as rplt
 import operating_points as op
 import computeforces as F
 # aerodynamic coefficients
-force_history = []
+
 params = {'c': 0.263,  # MAC
           'S': 0.441,  # Reference Area
           'g': 9.81,  # gravity
           'm': 4.5,  # Raybe Mass
           'Iyy': 0.13,  # Raybe Inertia
           'w1': 6.0,  # Flexible Mode 1 Nat.Freq in rad/s
-          'rho': 1.225,
+          'rho': 1.225,  # Density
           'R_aft': 0.5,  # meters, moment arm motor aft
           'R_fwd': 0.15,  # meters, moment arm motor fwd
           }
@@ -34,11 +34,19 @@ def raybe_eom(t, x, params, inp):
     Z = forces[1]
     M = forces[2]
     Q1 = forces[3]
-    force_history.append((t, X, Z, M, Q1))
-    uw = np.array([u, w])
-    ue, we = np.matmul(F.R(theta), uw)
 
-    dx = np.zeros_like(x)
+    # force_history.append((t, X, Z, M, Q1))
+
+    c = math.cos(theta)
+    s = math.sin(theta)
+    ue = c*u + s*w
+    we = -s*u + c*w
+
+    # uw = np.array([u, w])
+    # ue, we = np.matmul(F.R(theta), uw)
+
+    dx = np.empty_like(x)
+
     # Rigid Body Mode
     dx[0] = -g*math.sin(theta) - q*w + X/m  # u dot
     dx[1] = g*math.cos(theta) + q*u + Z/m  # w dot
@@ -62,13 +70,3 @@ x0, inp0 = op.steadycruise25()
 
 sol = solve_ivp(raybe_eom, (0, 10), x0, method='Radau',
                 args=(params, inp0,), rtol=1e-8, atol=1e-8)
-
-force_history_arr = np.array(force_history)  # shape: (N_eval, 5)
-
-t_force = force_history_arr[:, 0]
-X_hist = force_history_arr[:, 1]
-Z_hist = force_history_arr[:, 2]
-M_hist = force_history_arr[:, 3]
-Q1_hist = force_history_arr[:, 4]
-
-rplt.plot_solution(sol, force_history_arr)
