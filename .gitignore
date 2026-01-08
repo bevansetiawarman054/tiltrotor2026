@@ -1,7 +1,8 @@
-# Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[codz]
 *$py.class
+
+.vscode/
 
 # C extensions
 *.so
@@ -204,4 +205,8 @@ cython_debug/
 # Marimo
 marimo/_static/
 marimo/_lsp/
+<<<<<<< HEAD
 __marimo__/
+=======
+__marimo__/
+>>>>>>> f296ed0 (add .gitignore)
